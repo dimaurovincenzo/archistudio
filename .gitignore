@@ -1,0 +1,8 @@
+node_modules/
+out/
+release/
+dist/
+tmp/
+*.log
+*.cjs
+.DS_Store

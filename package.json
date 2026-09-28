@@ -1,0 +1,91 @@
+{
+  "name": "archistudio",
+  "productName": "ArchiStudio",
+  "version": "0.2.0",
+  "description": "Progetta l'architettura del software prima del codice — canvas visuale, Architetto AI, server MCP",
+  "main": "out/main/index.js",
+  "license": "MIT",
+  "author": "Vincenzo Di Mauro",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build && npm run build:mcp",
+    "build:mcp": "esbuild src/mcp-stdio/index.ts --bundle --platform=node --format=cjs --outfile=out/mcp/index.js --log-level=warning",
+    "start": "electron .",
+    "smoke": "electron . --smoke",
+    "test": "vitest run",
+    "test:mcp": "node scripts/test-mcp.mjs",
+    "typecheck": "tsc --noEmit",
+    "dist": "npm run build && electron-builder --mac zip --publish never"
+  },
+  "dependencies": {
+    "@dagrejs/dagre": "^3.1.1",
+    "@modelcontextprotocol/sdk": "^1.30.1",
+    "@xyflow/react": "^12.12.0",
+    "lucide-react": "^1.48.0",
+    "marked": "^18.0.14",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^3.25.76",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
+    "vite": "^7.3.6",
+    "vitest": "^5.0.2"
+  },
+  "build": {
+    "appId": "com.vincodelab.archistudio",
+    "productName": "ArchiStudio",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "out/**",
+      "package.json",
+      "!**/*.map"
+    ],
+    "extraResources": [
+      {
+        "from": "out/mcp",
+        "to": "mcp"
+      }
+    ],
+    "asar": true,
+    "mac": {
+      "target": [
+        {
+          "target": "zip",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.developer-tools",
+      "icon": "build/icon.png",
+      "identity": null,
+      "artifactName": "ArchiStudio-${version}-mac-${arch}.${ext}"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dimaurovincenzo/archistudio"
+  },
+  "keywords": [
+    "architecture",
+    "software-design",
+    "mcp",
+    "model-context-protocol",
+    "diagrams",
+    "electron",
+    "ai"
+  ]
+}
