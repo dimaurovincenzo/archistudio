@@ -26,9 +26,28 @@ export function Explorer() {
   const pendingMcp = useStore((s) => s.pendingMcpProposals)
   const voteMcp = useStore((s) => s.voteMcpProposal)
   const activeArtifactId = useStore((s) => (s.view.kind === 'artifact' ? s.activeArtifactId : null))
+  const collapsed = useStore((s) => s.collapsed)
   const searchFocusNonce = useStore((s) => s.searchFocusNonce)
   const applyOpsLocal = applyOps
   const [query, setQuery] = useState('')
+
+  const model = data?.model
+
+  const collapsedParents = useMemo(() => {
+    const set = new Set<string>()
+    for (const id of Object.keys(collapsed)) set.add(id)
+    return set
+  }, [collapsed])
+
+  // conto dei sotto-nodi per padre (per il badge nell'albero quando collassato)
+  const subCountByParent = useMemo(() => {
+    const m = new Map<string, number>()
+    if (!model) return m
+    for (const r of model.relations) {
+      if (r.type === 'component') m.set(r.sourceId, (m.get(r.sourceId) ?? 0) + 1)
+    }
+    return m
+  }, [model])
   const searchRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -113,23 +132,33 @@ export function Explorer() {
   }
 
   const q = query.trim().toLowerCase()
-  const model = data?.model
 
   const groups = useMemo(
     () => (model ? model.groups.filter((g) => !q || g.name.toLowerCase().includes(q)) : []),
     [model, q]
   )
+  // coerenza con la canvas: i sotto-nodi dei padri collassati non si mostrano nell'albero
+  const collapsedSubIds = useMemo(() => {
+    const set = new Set<string>()
+    if (!model) return set
+    for (const r of model.relations) {
+      if (r.type === 'component' && collapsedParents.has(r.sourceId)) set.add(r.targetId)
+    }
+    return set
+  }, [model, collapsedParents])
+
   const nodesByGroup = useMemo(() => {
     const map = new Map<string | null, ArchiNode[]>()
     if (!model) return map
     for (const n of model.nodes) {
+      if (collapsedSubIds.has(n.id) && !q) continue
       if (q && !`${n.name} ${n.type} ${n.technology}`.toLowerCase().includes(q)) continue
       const list = map.get(n.groupId) ?? []
       list.push(n)
       map.set(n.groupId, list)
     }
     return map
-  }, [model, q])
+  }, [model, q, collapsedSubIds])
 
   const artifactsByCat = useMemo(() => {
     const map = new Map<ArtifactCategory, ArchiArtifact[]>()
@@ -222,6 +251,8 @@ export function Explorer() {
 
   function NodeRow({ node: n }: { node: ArchiNode }) {
     const color = techColor(n.type, n.category)
+    const subCount = subCountByParent.get(n.id) ?? 0
+    const isCollapsed = Boolean(collapsed[n.id]) && subCount > 0
     return (
       <div
         className={`tree-item${selection.nodeIds.includes(n.id) ? ' active' : ''}`}
@@ -232,6 +263,7 @@ export function Explorer() {
       >
         <span className="cat-dot" style={{ background: color }} />
         <span className="t-name">{n.name}</span>
+        {isCollapsed && <span className="mods-badge" style={{ background: `${color}33`, color }}>{subCount} moduli</span>}
         <span className="t-icon">{nodeIcon(n.type)}</span>
       </div>
     )

@@ -604,12 +604,17 @@ function CanvasInner() {
   }
 
   const addComponentAt = async (pos: { x: number; y: number }) => {
-    const ok = await applyOps([{ op: 'create_node', node: { name: 'Nuovo componente', type: 'generic', position: pos } }])
+    const st0 = useStore.getState()
+    // nome progressivo: mai due "Nuovo componente" nello stesso progetto
+    const used = new Set((st0.data?.model.nodes ?? []).map((n) => n.name))
+    let name = 'Componente 1'
+    for (let i = 2; used.has(name); i++) name = `Componente ${i}`
+    const ok = await applyOps([{ op: 'create_node', node: { name, type: 'generic', position: pos } }])
     if (!ok) return
     // entra subito in rinomina: il nome si scrive sul nodo, poi il campo Tipo nell'Inspector
     const st = useStore.getState()
     const created = [...(st.data?.model.nodes ?? [])]
-      .filter((n) => n.name === 'Nuovo componente')
+      .filter((n) => n.name === name)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]
     if (created) {
       st.select([created.id])
