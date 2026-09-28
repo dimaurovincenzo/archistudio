@@ -773,7 +773,8 @@ function CanvasInner() {
         { type: 'separator' },
         { id: 'export-json', label: 'Esporta JSON…' },
         { id: 'export-mermaid', label: 'Esporta Mermaid…' },
-        { id: 'export-svg', label: 'Esporta SVG…' }
+        { id: 'export-svg', label: 'Esporta SVG…' },
+        { id: 'export-png', label: 'Esporta PNG…' }
       ],
       (id) => {
         if (id === 'add-component') addComponentAt(cursorPos)
@@ -783,6 +784,7 @@ function CanvasInner() {
         else if (id === 'export-json') void exportFile('json')
         else if (id === 'export-mermaid') void exportFile('mermaid')
         else if (id === 'export-svg') void exportFile('svg')
+        else if (id === 'export-png') void exportFile('png')
       }
     )
   }

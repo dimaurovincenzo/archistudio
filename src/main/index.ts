@@ -89,6 +89,7 @@ function buildMenu(): void {
       submenu: [
         { label: 'Nuovo progetto…', accelerator: 'CmdOrCtrl+N', click: () => sendAction('new-project') },
         { label: 'Cambia progetto…', accelerator: 'CmdOrCtrl+P', click: () => sendAction('open-project') },
+        { label: 'Importa progetto da JSON…', accelerator: 'CmdOrCtrl+I', click: () => sendAction('import-json') },
         { label: 'Apri cartella progetti', accelerator: 'CmdOrCtrl+O', click: () => sendAction('open-projects') },
         { type: 'separator' },
         { label: 'Salva versione…', accelerator: 'CmdOrCtrl+S', click: () => sendAction('save-version') },
@@ -96,6 +97,7 @@ function buildMenu(): void {
         { label: 'Esporta JSON…', accelerator: 'CmdOrCtrl+E', click: () => sendAction('export-json') },
         { label: 'Esporta Mermaid…', accelerator: 'CmdOrCtrl+Shift+E', click: () => sendAction('export-mermaid') },
         { label: 'Esporta SVG…', accelerator: 'CmdOrCtrl+Shift+G', click: () => sendAction('export-svg') },
+        { label: 'Esporta PNG…', accelerator: 'CmdOrCtrl+Shift+P', click: () => sendAction('export-png') },
         { type: 'separator' },
         { label: 'Mostra progetto nel Finder', accelerator: 'Shift+CmdOrCtrl+R', click: () => sendAction('reveal-project') },
         ...(isMac ? [] : [{ type: 'separator' } as MenuItemConstructorOptions, { role: 'quit' as const }])

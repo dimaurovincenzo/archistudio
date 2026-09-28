@@ -125,6 +125,38 @@ export function registerIpc(manager: ProjectManager, getWin: GetWin): void {
     await manager.deleteProject(id)
     return true
   })
+  ipcMain.handle('projects:import-json', async () => {
+    const res = await dialog.showOpenDialog(getWin()!, {
+      title: 'Importa progetto ArchiStudio',
+      defaultPath: app.getPath('documents'),
+      filters: [{ name: 'ArchiStudio JSON', extensions: ['json'] }],
+      properties: ['openFile']
+    })
+    if (res.canceled || res.filePaths.length === 0) return null
+    let parsed: { meta?: { name?: string; description?: string }; model?: { nodes?: unknown[]; relations?: unknown[]; groups?: unknown[]; artifacts?: unknown[] } }
+    try {
+      parsed = JSON.parse(await fs.readFile(res.filePaths[0], 'utf8'))
+    } catch {
+      return null
+    }
+    if (!parsed?.model || !Array.isArray(parsed.model.nodes)) return null
+    const name = `${parsed.meta?.name ?? 'Progetto importato'} (importato)`
+    const meta = await manager.createProject(name, parsed.meta?.description ?? 'Importato da export JSON')
+    await manager.openProject(meta.id)
+    const s = manager.store
+    const r1 = applyOps(s.model, (parsed.model.nodes ?? []) as Op[])
+    if (!r1.ok) throw new Error(r1.error)
+    const r2 = applyOps(s.model, (parsed.model.relations ?? []) as Op[])
+    if (!r2.ok) throw new Error(r2.error)
+    const r3 = applyOps(s.model, (parsed.model.groups ?? []) as Op[])
+    if (!r3.ok) throw new Error(r3.error)
+    const r4 = applyOps(s.model, (parsed.model.artifacts ?? []) as Op[])
+    if (!r4.ok) throw new Error(r4.error)
+    await s.persist()
+    await createSnapshot(s, s.model, 'v0.1 — Importato da JSON', 'manual')
+    return meta
+  })
+
   ipcMain.handle('projects:demo', async () => {
     const meta = await seedDemoProject(manager)
     const data = await manager.openProject(meta.id)
@@ -244,9 +276,9 @@ export function registerIpc(manager: ProjectManager, getWin: GetWin): void {
     return { ok: true, model: s.model, meta: s.meta, ...undoStatus(manager) }
   })
 
-  ipcMain.handle('export:file', async (_e, format: 'json' | 'mermaid' | 'svg') => {
+  ipcMain.handle('export:file', async (_e, format: 'json' | 'mermaid' | 'svg' | 'png') => {
     const s = requireStore()
-    const ext = format === 'json' ? 'json' : format === 'svg' ? 'svg' : 'mmd'
+    const ext = format === 'json' ? 'json' : format === 'svg' ? 'svg' : format === 'png' ? 'png' : 'mmd'
     const win = getWin()
     const res = await dialog.showSaveDialog(win!, {
       title: `Esporta ${format.toUpperCase()}`,
@@ -254,6 +286,19 @@ export function registerIpc(manager: ProjectManager, getWin: GetWin): void {
       filters: [{ name: format, extensions: [ext] }]
     })
     if (res.canceled || !res.filePath) return null
+    if (format === 'png') {
+      // cattura nativa dell'area canvas alla risoluzione del display (retina = 2×)
+      const rect = await getWin()!.webContents.executeJavaScript(`(function () {
+        const el = document.querySelector('.canvas-wrap')
+        if (!el) return null
+        const r = el.getBoundingClientRect()
+        return { x: Math.round(r.x), y: Math.round(r.y), width: Math.round(r.width), height: Math.round(r.height) }
+      })()`)
+      if (!rect) return null
+      const image = await getWin()!.webContents.capturePage(rect)
+      await fs.writeFile(res.filePath, image.toPNG())
+      return res.filePath
+    }
     const data =
       format === 'json'
         ? exportJson(s.model, { name: s.meta.name, description: s.meta.description })

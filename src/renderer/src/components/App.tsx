@@ -171,6 +171,12 @@ export function App() {
         case 'export-svg':
           void st().exportFile('svg')
           break
+        case 'export-png':
+          void st().exportFile('png')
+          break
+        case 'import-json':
+          void st().importProject()
+          break
         case 'reveal-project':
           void api.app.revealProject()
           break

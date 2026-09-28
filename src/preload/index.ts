@@ -31,7 +31,8 @@ const api = {
       ipcRenderer.invoke('projects:create', name, description ?? ''),
     open: (id: string): Promise<ProjectData> => ipcRenderer.invoke('projects:open', id),
     delete: (id: string): Promise<boolean> => ipcRenderer.invoke('projects:delete', id),
-    demo: (): Promise<ProjectData> => ipcRenderer.invoke('projects:demo')
+    demo: (): Promise<ProjectData> => ipcRenderer.invoke('projects:demo'),
+    importJson: (): Promise<ProjectMeta | null> => ipcRenderer.invoke('projects:import-json')
   },
   project: {
     get: (): Promise<ProjectData> => ipcRenderer.invoke('project:get')
@@ -64,7 +65,7 @@ const api = {
     ): Promise<{ ok: boolean; error?: string; model?: ProjectData['model']; meta?: ProjectData['meta'] }> =>
       ipcRenderer.invoke('versions:restore', id)
   },
-  exportFile: (format: 'json' | 'mermaid' | 'svg'): Promise<string | null> =>
+  exportFile: (format: 'json' | 'mermaid' | 'svg' | 'png'): Promise<string | null> =>
     ipcRenderer.invoke('export:file', format),
   ai: {
     chat: (history: ChatMessage[], selection: AiContextRequest) =>

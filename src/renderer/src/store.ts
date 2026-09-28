@@ -79,6 +79,7 @@ interface UIStore {
   openProject: (id: string) => Promise<void>
   switchProject: (id: string) => Promise<void>
   openDemo: () => Promise<void>
+  importProject: () => Promise<void>
   deleteProject: (id: string) => Promise<void>
   applyOps: (ops: Op[], source?: string) => Promise<boolean>
   select: (nodeIds: string[], relationIds?: string[]) => void
@@ -100,7 +101,7 @@ interface UIStore {
   setSettingsOpen: (open: boolean) => void
   saveSettings: (s: AppSettings) => Promise<void>
   showToast: (text: string, action?: { label: string; run: () => void }) => void
-  exportFile: (format: 'json' | 'mermaid' | 'svg') => Promise<void>
+  exportFile: (format: 'json' | 'mermaid' | 'svg' | 'png') => Promise<void>
   undo: () => Promise<void>
   redo: () => Promise<void>
   requestInput: (title: string, value?: string) => Promise<string | null>
@@ -248,6 +249,14 @@ export const useStore = create<UIStore>((set, get) => ({
     })
     get().setAllCollapsed(true)
     await Promise.all([get().runValidation(), get().refreshVersions(), get().refreshServerState()])
+  },
+
+  importProject: async () => {
+    const meta = await api.projects.importJson()
+    if (!meta) return // dialog annullata
+    await get().refreshProjects()
+    await get().openProject(meta.id)
+    get().showToast(`Progetto importato: ${meta.name}`)
   },
 
   openDemo: async () => {

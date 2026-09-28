@@ -47,6 +47,8 @@ export function CommandPalette() {
       { id: 'export-json', label: 'Esporta JSON…', section: 'Progetto', run: run(() => void s.getState().exportFile('json')) },
       { id: 'export-mermaid', label: 'Esporta Mermaid…', section: 'Progetto', run: run(() => void s.getState().exportFile('mermaid')) },
       { id: 'export-svg', label: 'Esporta SVG…', section: 'Progetto', run: run(() => void s.getState().exportFile('svg')) },
+      { id: 'export-png', label: 'Esporta PNG…', section: 'Progetto', run: run(() => void s.getState().exportFile('png')) },
+      { id: 'import-json', label: 'Importa progetto da JSON…', section: 'Progetto', run: run(() => void s.getState().importProject()) },
       { id: 'settings', label: 'Impostazioni…', section: 'Progetto', run: run(() => s.getState().setSettingsOpen(true)) },
       { id: 'undo', label: 'Annulla', section: 'Modifica', run: run(() => void s.getState().undo()) },
       { id: 'redo', label: 'Ripeti', section: 'Modifica', run: run(() => void s.getState().redo()) },
