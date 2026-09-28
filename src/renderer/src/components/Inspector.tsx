@@ -17,6 +17,7 @@ export function Inspector() {
   const issues = useStore((s) => s.issues)
   const [draft, setDraft] = useState<Record<string, string>>({})
   const [pickerOpen, setPickerOpen] = useState(false)
+  const pickerFromStore = useStore((s) => s.techPickerNodeId)
 
   const model = data?.model
 
@@ -161,14 +162,18 @@ export function Inspector() {
         <span style={{ flex: 1 }} />
         <span className="tech-cat">{techInfo(node.type).category}</span>
       </button>
-      {pickerOpen && (
+      {(pickerOpen || pickerFromStore === node.id) && (
         <TechPicker
           value={node.type}
           onSelect={(t) => {
             setPickerOpen(false)
+            useStore.setState({ techPickerNodeId: null })
             commitField(node.id, 'type', t)
           }}
-          onClose={() => setPickerOpen(false)}
+          onClose={() => {
+            setPickerOpen(false)
+            useStore.setState({ techPickerNodeId: null })
+          }}
         />
       )}
 

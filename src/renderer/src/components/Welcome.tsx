@@ -27,15 +27,25 @@ export function Welcome() {
           Progetta l'architettura del software prima del codice. Modello visuale, collaborazione con l'AI, accesso MCP per agenti esterni — l'architettura è la source of truth.
         </div>
 
+        <div className="welcome-cta">
+          <button className="primary welcome-big" onClick={() => void openDemo()}>
+            Prova la demo
+          </button>
+          <button className="welcome-big" onClick={() => document.getElementById('new-project-name')?.focus()}>
+            Crea progetto
+          </button>
+        </div>
+
         <div className="welcome-new">
           <input
+            id="new-project-name"
             placeholder="Nome del nuovo progetto… es. «La mia piattaforma SaaS»"
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && name.trim() && void createProject(name.trim(), '')}
           />
           <button className="primary" disabled={!name.trim()} onClick={() => void createProject(name.trim(), '')}>
-            Crea progetto
+            Crea
           </button>
         </div>
 

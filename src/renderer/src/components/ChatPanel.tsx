@@ -158,6 +158,19 @@ export function ChatPanel() {
       )}
       <div className="chat-body" ref={bodyRef}>
         {messages.length === 0 && (
+          <div className="chat-quick">
+            <button className="chip clickable" onClick={() => void sendChat('Aggiungi un Redis cache tra API e Worker')}>
+              + Aggiungi un Redis tra API e Worker
+            </button>
+            <button className="chip clickable" onClick={() => void sendChat('Analizza l\'architettura attuale: punti deboli e migliorie?')}>
+              Analizza l'architettura
+            </button>
+            <button className="chip clickable" onClick={() => void sendChat('Genera la specifica API del componente selezionato o della API principale')}>
+              Genera una specifica API
+            </button>
+          </div>
+        )}
+        {messages.length === 0 && (
           <div className="empty-hint">
             {aiConfigured ? (
               <>

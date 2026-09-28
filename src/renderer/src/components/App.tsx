@@ -259,7 +259,16 @@ export function App() {
       <Onboarding />
       <HelpCenter />
       {settingsOpen && <SettingsDialog />}
-      {toast && <div className="toast" key={toast.nonce}>{toast.text}</div>}
+      {toast && (
+        <div className="toast" key={toast.nonce}>
+          <span>{toast.text}</span>
+          {toast.action && (
+            <button className="small primary toast-action" onClick={() => { toast.action!.run() }}>
+              {toast.action.label}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }

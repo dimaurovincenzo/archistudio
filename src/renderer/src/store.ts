@@ -63,13 +63,14 @@ interface UIStore {
   expansion: { rootId: string; depth: number } | null
   collapsed: Record<string, boolean>
   editingNodeId: string | null
+  techPickerNodeId: string | null
   showExplorer: boolean
   showInspector: boolean
   canUndo: boolean
   canRedo: boolean
   canvasCmd: { cmd: 'zoom-in' | 'zoom-out' | 'zoom-reset' | 'fit' | 'auto-layout'; nonce: number } | null
   searchFocusNonce: number
-  toast: { text: string; nonce: number } | null
+  toast: { text: string; nonce: number; action?: { label: string; run: () => void } } | null
 
   boot: () => Promise<void>
   refreshProjects: () => Promise<void>
@@ -98,7 +99,7 @@ interface UIStore {
   voteMcpProposal: (id: string, vote: 'approved' | 'rejected') => Promise<void>
   setSettingsOpen: (open: boolean) => void
   saveSettings: (s: AppSettings) => Promise<void>
-  showToast: (text: string) => void
+  showToast: (text: string, action?: { label: string; run: () => void }) => void
   exportFile: (format: 'json' | 'mermaid' | 'svg') => Promise<void>
   undo: () => Promise<void>
   redo: () => Promise<void>
@@ -119,6 +120,7 @@ interface UIStore {
   closeExpansion: () => void
   toggleCollapsed: (id: string) => void
   setEditingNodeId: (id: string | null) => void
+  openTechPicker: (id: string) => void
   setAllCollapsed: (collapsed: boolean) => void
   setPaletteOpen: (open: boolean) => void
   setWelcomeOverride: (open: boolean) => void
@@ -176,6 +178,7 @@ export const useStore = create<UIStore>((set, get) => ({
   expansion: null,
   collapsed: {},
   editingNodeId: null,
+  techPickerNodeId: null,
   showExplorer: true,
   showInspector: true,
   canUndo: false,
@@ -281,7 +284,15 @@ export const useStore = create<UIStore>((set, get) => ({
       }))
       const showToast = get().showToast
       if (ops.some((o) => o.op === 'create_node')) {
-        coach('create_node', 'Componente creato — scegli la tecnologia dal campo Tipo nel pannello di destra (169 tecnologie con icona)', showToast)
+        const created = ops.find((o) => o.op === 'create_node' && typeof (o as { node?: { id?: string } }).node?.id === 'string')
+        const createdId = created ? (created as { node: { id: string } }).node.id : get().selection.nodeIds[0]
+        coach('create_node', 'Componente creato — scegli la sua tecnologia per icona e colore', (t) =>
+          showToast(t, {
+            label: 'Scegli…',
+            run: () => {
+              if (createdId) get().openTechPicker(createdId)
+            }
+          }))
       }
       if (ops.some((o) => o.op === 'create_relation')) {
         coach('create_relation', 'Collegamento creato — tasto destro sulla freccia per cambiare tipo (REST, DB, coda…) e protocollo', showToast)
@@ -521,6 +532,7 @@ export const useStore = create<UIStore>((set, get) => ({
   }),
 
   setEditingNodeId: (id) => set({ editingNodeId: id }),
+  openTechPicker: (id) => set({ techPickerNodeId: id, selection: { nodeIds: [id], relationIds: [] } }),
 
   // true = vista sistema (tutti i padri decomposti collassati) · false = vista completa
   setAllCollapsed: (want) => set((s) => {
@@ -594,10 +606,10 @@ export const useStore = create<UIStore>((set, get) => ({
     }
   },
 
-  showToast: (text) => {
+  showToast: (text, action) => {
     if (toastTimer) clearTimeout(toastTimer)
-    set({ toast: { text, nonce: Date.now() } })
-    toastTimer = setTimeout(() => set({ toast: null }), 3200)
+    set({ toast: { text, nonce: Date.now(), action } })
+    toastTimer = setTimeout(() => set({ toast: null }), action ? 6000 : 3200)
   },
 
   exportFile: async (format) => {
