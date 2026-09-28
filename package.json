@@ -1,7 +1,7 @@
 {
   "name": "archistudio",
   "productName": "ArchiStudio",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Progetta l'architettura del software prima del codice — canvas visuale, Architetto AI, server MCP",
   "main": "out/main/index.js",
   "license": "MIT",
