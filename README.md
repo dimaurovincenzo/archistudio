@@ -93,6 +93,15 @@ No proprietary blob: every entity is a file, git-friendly out of the box.
 
 The full list lives in the in-app Help Center (Cmd+/).
 
+## Documentation
+
+| Document | Content |
+|---|---|
+| [Internal architecture](docs/architecture.md) | Processes, the `applyOps` mutation funnel, undo/redo, persistence, AI layer, renderer conventions |
+| [Project format](docs/project-format.md) | On-disk layout, JSON schemas per entity, Markdown artifacts, versions, audit log |
+| [MCP server reference](docs/mcp.md) | All 18 tools with parameters, 5 resources, security modes, connecting clients, testing |
+| [Development guide](docs/development.md) | Setup, scripts, code layout, conventions, testing, CDP debugging, release |
+
 ## Tech stack
 
 Electron 44 - React 19 - React Flow (@xyflow/react) - Zustand - TypeScript - official MCP TypeScript SDK - dagre - electron-vite. UI language: Italian.
